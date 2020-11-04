@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "constants.hpp"
+#include "editor_screen.hpp"
 #include "entity.hpp"
 #include "entity_storage.hpp"
 #include "game_screen.hpp"
@@ -25,6 +26,7 @@ int main(void) {
   SetExitKey(0);
 
   ScreenStack screen_stack;
+  screen_stack.push(std::make_unique<EditorScreen>());
   screen_stack.push(std::make_unique<GameScreen>());
 
   while (!WindowShouldClose()) {
