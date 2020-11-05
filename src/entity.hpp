@@ -3,7 +3,7 @@
 #include <raylib.h>
 
 /** A tag to indicate what 'kind' of entity this is - found on every entity*/
-enum EntityKind { EK_PLAYER, EK_ENEMY, EK_MIRROR };
+enum EntityKind { EK_PLAYER, EK_ENEMY, EK_MIRROR, EK_LASER };
 
 /** Data for EK_MIRROR entities */
 struct MirrorData {
