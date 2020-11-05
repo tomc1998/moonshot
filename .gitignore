@@ -4,3 +4,6 @@ build
 # Ignore vim lock files
 *.swp
 
+# Ignore codelite generated and build files
+/.codelite/
+/cmake-build-*
