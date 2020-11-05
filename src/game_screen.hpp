@@ -9,6 +9,7 @@
 #include "simple_tileset.hpp"
 #include "smooth_camera.hpp"
 #include "tilemap.hpp"
+#include <cmath>
 
 /** Check for input, and move the player */
 void move_player(EntityStorage &es, EntityId playerId) {
@@ -31,7 +32,19 @@ void move_player(EntityStorage &es, EntityId playerId) {
 }
 
 void render_entities(const EntityStorage &es) {
-  es.iter([](const Entity &e) { DrawRectangleV(e.pos, {16, 16}, WHITE); });
+  es.iter([](const Entity &e) {
+    if (e.kind == EK_MIRROR) {
+      // Mirror positioned at the top left, find the center
+      Vector2 c{e.pos.x + MIRROR_WIDTH / 2, e.pos.y + MIRROR_WIDTH / 2};
+      Vector2 start{c.x - cos(e.mirror.rot) * MIRROR_WIDTH / 2,
+                    c.y - sin(e.mirror.rot) * MIRROR_WIDTH / 2};
+      Vector2 end{c.x + cos(e.mirror.rot) * MIRROR_WIDTH / 2,
+                  c.y + sin(e.mirror.rot) * MIRROR_WIDTH / 2};
+      DrawLineEx(start, end, 4, WHITE);
+    } else {
+      DrawRectangleV(e.pos, {16, 16}, WHITE);
+    }
+  });
 }
 
 void update_entities(EntityStorage &es, float dt) {
@@ -92,6 +105,7 @@ struct GameScreen : public Screen {
   GameScreen() : camera(screen_w, screen_h, 0, 0, 2, 0.05) {}
   void on_mount() {
     player = es.alloc(Entity(EK_PLAYER, 16, 16));
+    es.alloc(Entity(EK_MIRROR, 16, 64, MirrorData{PI / 4}));
     simple_tileset = load_simple_tileset();
     // clang-format off
     tm = Tilemap{0, 0, 16, 16, {
