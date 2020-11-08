@@ -65,6 +65,12 @@ int main(void) {
 
   while (!WindowShouldClose()) {
     screen_stack.last().on_frame();
+    if (IsKeyPressed(KEY_ESCAPE)) {
+      screen_stack.pop();
+      if (screen_stack.size() == 0) {
+        break;
+      }
+    }
   }
 
   CloseWindow();

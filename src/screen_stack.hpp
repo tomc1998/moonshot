@@ -15,6 +15,7 @@ public:
     stack.back()->on_unmount();
     stack.pop_back();
   }
+  inline std::size_t size() { return stack.size(); }
   inline Screen &last() {
     assert(stack.size() > 0);
     return *stack.back();
