@@ -24,6 +24,7 @@ inline void render_entities(const EntityStorage &es) {
 
 inline void render_laser(const Laser &laser) {
 
+  DrawCircle(laser.position.x, laser.position.y, 5, GREEN);
   const Vector2 *current_vertex = &laser.position;
   for (const Vector2 &vertex : laser.vertices()) {
     DrawLineEx(*current_vertex, vertex, 2, GREEN);

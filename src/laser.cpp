@@ -10,12 +10,14 @@ void Laser::update(const GameState &state, float dt) {
   if (IsMouseButtonDown(0)) {
     if (length == 0) {
       // Set the firing angle from towards the mouse
-      const auto mouse_position =
+      const auto mouse_position_relative_to_player =
           Vector2Subtract(GetMousePosition(), {screen_w / 2, screen_h / 2});
+      const auto player_position =
+          Vector2Add(state.es.lookup(state.player)->pos, Vector2{8, 8});
+      const auto mouse_position =
+          Vector2Add(mouse_position_relative_to_player, player_position);
       const auto delta_to_mouse = Vector2Subtract(mouse_position, position);
       firing_angle = atan2f(-delta_to_mouse.y, delta_to_mouse.x);
-
-      // TODO: something not quite right here with the angle calculation
     }
 
     if (length < max_length) {
