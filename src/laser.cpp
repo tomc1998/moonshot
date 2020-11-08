@@ -1,5 +1,9 @@
+#include "constants.hpp"
 #include "game_state.hpp"
+#include "geometry.hpp"
 #include "laser.hpp"
+#include "mirror.hpp"
+#include <algorithm>
 
 Laser::Laser()
     : max_length(MIN_LASER_LENGTH), position(Vector2{0, 0}), length(0),

@@ -1,10 +1,6 @@
 #pragma once
 
-#include "entity.hpp"
-#include "geometry.hpp"
-#include "mirror.hpp"
 #include <raylib.h>
-#include <raymath.h>
 #include <vector>
 
 class GameState;
