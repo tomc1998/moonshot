@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="src/laser.cpp"/>
     <File Name="src/geometry.hpp"/>
     <File Name="src/mirror.hpp"/>
     <File Name="src/laser.hpp"/>

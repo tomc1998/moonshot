@@ -5,28 +5,26 @@
 #include "mirror.hpp"
 #include <raylib.h>
 #include <raymath.h>
+#include <vector>
 
-inline Vector2 getLaserRear(const Entity &e) {
-  assert(e.kind == EK_LASER);
-  return Vector2Subtract(e.pos,
-                         Vector2Scale(Vector2Normalize(e.vel), LASER_LEN));
-}
+class GameState;
 
-inline Vector2 getLaserFront(const Entity &e) {
-  assert(e.kind == EK_LASER);
-  return e.pos;
-}
+class Laser {
 
-inline bool laserIntersectsMirror(const Entity &laser, const Entity &mirror) {
-  assert(laser.kind == EK_LASER);
-  assert(mirror.kind == EK_MIRROR);
+public:
+  Vector2 position;
+  float length;       // length increases as laser advances
+  float firing_angle; // in radians
+  float max_length;
 
-  return lineSegmentsIntersect(getLaserFront(laser), getLaserRear(laser),
-                               getMirrorLeft(mirror), getMirrorRight(mirror));
-}
+  Laser();
 
-inline Vector2 getLaserMirrorIntersection(const Entity &laser,
-                                          const Entity &mirror) {
-  assert(laser.kind == EK_LASER);
-  assert(mirror.kind == EK_MIRROR);
-}
+  inline const std::vector<Vector2> &vertices() const { return _vertices; }
+
+  void calculate_laser_vertices(const GameState &state);
+
+  void update(const GameState &state, float dt);
+
+private:
+  std::vector<Vector2> _vertices;
+};
