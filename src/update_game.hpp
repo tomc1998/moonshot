@@ -35,8 +35,8 @@ inline void update_player(GameState &state, EntityId playerId) {
   // Spawning lasers
   if (IsMouseButtonPressed(0)) {
     // Mouse relative to player
-    auto mouse =
-        Vector2Subtract(GetMousePosition(), {screen_w / 2, screen_h / 2});
+    auto mouse = Vector2Subtract(GetMousePosition(),
+                                 {(float)screen_w / 2, (float)screen_h / 2});
     auto laser_vel = Vector2Scale(Vector2Normalize(mouse), LASER_SPEED);
     auto laser_off = Vector2Scale(Vector2Normalize(mouse), LASER_LEN);
     auto laser_pos = Vector2Add(Vector2Add(player->pos, {8, 8}), laser_off);
@@ -48,7 +48,7 @@ inline void update_player(GameState &state, EntityId playerId) {
 
 /** Just snaps positions, call after processing velocities */
 inline void resolve_tile_collisions(GameState &state) {
-  const Tileset &ts = state.simple_tileset;
+  const Tileset &ts = *state.tileset;
   const Tilemap &tm = state.tm;
   state.es.iter([&](Entity &e) {
     const auto size = e.size();

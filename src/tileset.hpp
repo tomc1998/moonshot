@@ -17,4 +17,5 @@ struct Tileset {
   /** Tile width / height in pixels */
   int tile_size;
   std::vector<Tile> tiles;
+  Tileset(Texture2D tex, int tile_size) : tex(tex), tile_size(tile_size) {}
 };

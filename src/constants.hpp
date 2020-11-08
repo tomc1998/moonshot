@@ -12,3 +12,9 @@ constexpr float MIRROR_WIDTH = 16.0f;
 constexpr float LASER_LEN = 16.0f;
 constexpr float LASER_SPEED = 800.0f;
 constexpr float MIN_LASER_LENGTH = 400.0f;
+
+/** Lower makes the camera snap to the desired position slower, makes the
+ * camera feel 'looser', as if it were on a much looser elastic band. A value
+ * of 1 will make the camera perfectly track the desired position. A value of 0
+ * will stop the camera moving. */
+constexpr float CAMERA_SNAP_SPEED = 0.05;

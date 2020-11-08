@@ -18,7 +18,6 @@
 struct GameScreen : public Screen {
   GameState state;
   GameScreen() {}
-  void on_mount() { state.load(); }
   void on_frame() {
     game_update(state);
 
@@ -27,7 +26,7 @@ struct GameScreen : public Screen {
     ClearBackground(BLACK);
 
     BeginMode2D(state.camera.inner);
-    state.tm.render(state.simple_tileset);
+    state.tm.render(*state.tileset);
     render_entities(state.es);
     render_laser(state.laser);
     EndMode2D();

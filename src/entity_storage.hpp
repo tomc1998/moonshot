@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <iterator>
 #include <vector>
 
 #include "entity.hpp"
@@ -16,8 +17,7 @@ struct EntityStorage {
 
   /** Iterate through the entities, call `f` on each present entity, f is
    * provided with an Entity. */
-  template <typename F>
-  inline void iter(F f) {
+  template <typename F> inline void iter(F f) {
     assert(entity_list.size() == present_list.size());
     for (int ii = 0; ii < entity_list.size(); ++ii) {
       if (present_list[ii]) {
@@ -27,8 +27,7 @@ struct EntityStorage {
   }
 
   /** Const version of iter */
-  template <typename F>
-  inline void iter(F f) const {
+  template <typename F> inline void iter(F f) const {
     assert(entity_list.size() == present_list.size());
     for (int ii = 0; ii < entity_list.size(); ++ii) {
       if (present_list[ii]) {
@@ -55,7 +54,7 @@ struct EntityStorage {
   }
 
   /** Returns null if not present */
-  inline Entity* lookup(EntityId id) {
+  inline Entity *lookup(EntityId id) {
     assert(entity_list.size() == present_list.size());
     if (id >= entity_list.size() or not present_list[id]) {
       return nullptr;
@@ -64,11 +63,35 @@ struct EntityStorage {
   }
 
   /** Returns null if not present */
-  inline const Entity* lookup(EntityId id) const {
+  inline const Entity *lookup(EntityId id) const {
     assert(entity_list.size() == present_list.size());
     if (id >= entity_list.size() or not present_list[id]) {
       return nullptr;
     }
     return &entity_list[id];
+  }
+
+  /** Clear all entities - useful for reloading the game state. */
+  inline void clear() {
+    entity_list.clear();
+    present_list.clear();
+  }
+
+  /** Load a list of entities. Iterators should support - operator to s */
+  template <typename Iter> inline void load_all(Iter start, Iter end) {
+    entity_list.insert(entity_list.end(), start, end);
+    std::fill_n(std::back_inserter(present_list), std::distance(start, end),
+                true);
+  }
+
+  /** Returns -1 if not found */
+  template <typename UnaryPredicate>
+  inline EntityId find_if(UnaryPredicate pred) {
+    for (int ii = 0; ii < entity_list.size(); ++ii) {
+      if (present_list[ii] and pred(entity_list[ii])) {
+        return ii;
+      }
+    }
+    return -1;
   }
 };

@@ -1,7 +1,7 @@
+#include "laser.hpp"
 #include "constants.hpp"
 #include "game_state.hpp"
 #include "geometry.hpp"
-#include "laser.hpp"
 #include "mirror.hpp"
 #include "nearest_intersector_finder.hpp"
 #include <algorithm>
@@ -78,7 +78,7 @@ void Laser::calculate_laser_vertices(const GameState &state) {
 
     // TODO: We also need to check for intersections with wall tiles.
     const Tile *closest_intersecting_tile = nullptr;
-    const Tileset &ts = state.simple_tileset;
+    const Tileset &ts = *state.tileset;
     const Tilemap &tm = state.tm;
     for (int xx = 0; xx < tm.w; ++xx) {
       for (int yy = 0; yy < tm.h; ++yy) {
