@@ -29,6 +29,7 @@ struct GameScreen : public Screen {
     BeginMode2D(state.camera.inner);
     state.tm.render(state.simple_tileset);
     render_entities(state.es);
+    render_laser(state.laser);
     EndMode2D();
 
     DrawFPS(10, screen_h - 26);

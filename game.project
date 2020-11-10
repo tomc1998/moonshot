@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="game" Version="10.0.0" InternalType="Console">
-  <VirtualDirectory Name="include">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00010001N0011Debug_Linux000000000000]]>
+    </Plugin>
+  </Plugins>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="src">
+    <File Name="src/laser.cpp"/>
+    <File Name="src/geometry.hpp"/>
+    <File Name="src/mirror.hpp"/>
+    <File Name="src/laser.hpp"/>
     <File Name="src/tileset.hpp"/>
     <File Name="src/tilemap.hpp"/>
     <File Name="src/smooth_camera.hpp"/>
@@ -13,19 +24,15 @@
     <File Name="src/entity.hpp"/>
     <File Name="src/editor_screen.hpp"/>
     <File Name="src/constants.hpp"/>
-  </VirtualDirectory>
-  <Plugins>
-    <Plugin Name="qmake">
-      <![CDATA[00010001N0011Debug_Linux000000000000]]>
-    </Plugin>
-  </Plugins>
-  <Description/>
-  <Dependencies/>
-  <VirtualDirectory Name="src">
+    <File Name="src/update_game.hpp"/>
+    <File Name="src/render_game.hpp"/>
+    <File Name="src/game_state.hpp"/>
     <File Name="src/main.cpp"/>
     <File Name="src/globals.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="resources">
+    <File Name=".gitignore"/>
+    <File Name=".clang-format"/>
     <File Name="CMakeLists.txt"/>
   </VirtualDirectory>
   <Settings Type="Executable">

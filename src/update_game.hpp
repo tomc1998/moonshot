@@ -92,6 +92,8 @@ inline void resolve_tile_collisions(GameState &state) {
 inline void game_update(GameState &state) {
   update_player(state, state.player);
   update_entities(state, DT);
+  state.laser.update(state, DT);
+  state.laser.calculate_laser_vertices(state);
   resolve_tile_collisions(state);
 
   state.camera.target =
