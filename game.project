@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="src/nearest_intersection_finder.cpp"/>
+    <File Name="src/nearest_intersector_finder.hpp"/>
     <File Name="src/laser.cpp"/>
     <File Name="src/geometry.hpp"/>
     <File Name="src/mirror.hpp"/>
