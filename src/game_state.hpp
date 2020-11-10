@@ -24,6 +24,7 @@ struct GameState {
     es.alloc(Entity(EK_MIRROR, 16, 64, MirrorData{PI / 4}));
     es.alloc(Entity(EK_MIRROR, 64, 64, MirrorData{-PI / 4}));
     es.alloc(Entity(EK_MIRROR, 64, 16, MirrorData{-PI / 4}));
+    es.alloc(Entity(EK_MIRROR, 128, 16, MirrorData{PI / 3}));
     laser.position = Vector2{24, 24};
     simple_tileset = load_simple_tileset();
     // clang-format off
