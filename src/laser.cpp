@@ -3,6 +3,7 @@
 #include "geometry.hpp"
 #include "laser.hpp"
 #include "mirror.hpp"
+#include "nearest_intersector_finder.hpp"
 #include <algorithm>
 
 Laser::Laser()
@@ -52,8 +53,10 @@ void Laser::calculate_laser_vertices(const GameState &state) {
 
     // Now find all entities that intersect with that line segment. We want the
     // entity that is closest to the current position.
-    float closest_distance = std::numeric_limits<float>::infinity();
-    Vector2 closest_intersection;
+    NearestIntersectorFinder nearestIntersectionFinder(
+        current_position, line_segment_end,
+        std::numeric_limits<float>::infinity());
+
     const Entity *closest_intersecting_entity = nullptr;
     state.es.iter([&](const Entity &e) {
       if (&e != previous_intersecting_entity) {
@@ -61,24 +64,10 @@ void Laser::calculate_laser_vertices(const GameState &state) {
         case EK_MIRROR: {
           auto mirror_left = get_mirror_left(e);
           auto mirror_right = get_mirror_right(e);
-          if (line_segments_intersect(current_position, line_segment_end,
-                                      mirror_left, mirror_right)) {
-            // The mirror intersects with the laser path, so find the
-            // intersection point so we can see determine whether it is
-            // closest.
-
-            auto intersection = get_line_intersection(
-                current_position, line_segment_end, mirror_left, mirror_right);
-            auto distance_to_intersection =
-                Vector2Distance(current_position, intersection);
-
-            if (distance_to_intersection < closest_distance) {
-              closest_distance = distance_to_intersection;
-              closest_intersection = intersection;
-              closest_intersecting_entity = &e;
-            }
+          if (nearestIntersectionFinder.TestForNearestIntersection(
+                  mirror_left, mirror_right)) {
+            closest_intersecting_entity = &e;
           }
-
         } break;
         default:
           // laser goes straight through all other entity types
@@ -88,6 +77,60 @@ void Laser::calculate_laser_vertices(const GameState &state) {
     });
 
     // TODO: We also need to check for intersections with wall tiles.
+    const Tile *closest_intersecting_tile = nullptr;
+    const Tileset &ts = state.simple_tileset;
+    const Tilemap &tm = state.tm;
+    for (int xx = 0; xx < tm.w; ++xx) {
+      for (int yy = 0; yy < tm.h; ++yy) {
+        const auto &tile = ts.tiles[tm.tiles[yy * tm.w + xx]];
+        if (!tile.collides) {
+          // If a tile doesn't collide, we'll also say that it doesn't stop the
+          // laser. We might want to later add an "is_transparent" property to a
+          // Tile so we can have colliding glass tile that the laser still
+          // passes through.
+          continue;
+        }
+
+        // Get the tile corner points in clockwise order around the tile
+        const Vector2 tile_corner_1{tm.x + xx * ts.tile_size,
+                                    tm.y + yy * ts.tile_size};
+        const Vector2 tile_corner_2{tile_corner_1.x + ts.tile_size,
+                                    tile_corner_1.y};
+        const Vector2 tile_corner_3{tile_corner_1.x + ts.tile_size,
+                                    tile_corner_1.y + ts.tile_size};
+        const Vector2 tile_corner_4{tile_corner_1.x,
+                                    tile_corner_1.y + ts.tile_size};
+
+        // A tile has four sides, each side being a line segment, so check for
+        // intersection with any of those four sides. If any do, take the
+        // closest one, and then see if it is closer than the closest
+        // intersecting (mirror) entity
+
+        if (nearestIntersectionFinder.TestForNearestIntersection(
+                tile_corner_1, tile_corner_2)) {
+          closest_intersecting_tile = &tile;
+          closest_intersecting_entity = nullptr;
+        }
+
+        if (nearestIntersectionFinder.TestForNearestIntersection(
+                tile_corner_2, tile_corner_3)) {
+          closest_intersecting_tile = &tile;
+          closest_intersecting_entity = nullptr;
+        }
+
+        if (nearestIntersectionFinder.TestForNearestIntersection(
+                tile_corner_3, tile_corner_4)) {
+          closest_intersecting_tile = &tile;
+          closest_intersecting_entity = nullptr;
+        }
+
+        if (nearestIntersectionFinder.TestForNearestIntersection(
+                tile_corner_4, tile_corner_1)) {
+          closest_intersecting_tile = &tile;
+          closest_intersecting_entity = nullptr;
+        }
+      }
+    }
 
     // Now decide what to do at the intersecting entity
     if (closest_intersecting_entity != nullptr) {
@@ -98,12 +141,12 @@ void Laser::calculate_laser_vertices(const GameState &state) {
 
       switch (closest_intersecting_entity->kind) {
       case EK_MIRROR: {
-        _vertices.emplace_back(closest_intersection);
-        remaining_length -= closest_distance;
+        _vertices.emplace_back(nearestIntersectionFinder.closest_intersection);
+        remaining_length -= nearestIntersectionFinder.closest_distance_so_far;
 
-        auto approachingVector =
-            Vector2Subtract(closest_intersection, current_position);
-        current_position = closest_intersection;
+        auto approachingVector = Vector2Subtract(
+            nearestIntersectionFinder.closest_intersection, current_position);
+        current_position = nearestIntersectionFinder.closest_intersection;
 
         // The mirror reflects so work out what the new angle of the laser is
         // from the intersection point
@@ -120,6 +163,10 @@ void Laser::calculate_laser_vertices(const GameState &state) {
         assert(false); // TODO: handle other entity types
         break;
       }
+    } else if (closest_intersecting_tile != nullptr) {
+      // We've hit a tile, so stop the laser at that point
+      _vertices.emplace_back(nearestIntersectionFinder.closest_intersection);
+      remaining_length = 0;
     } else {
       // There are no intersecting entities, so just continue the laser for the
       // remaining length
