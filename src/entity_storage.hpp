@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <iterator>
 #include <vector>
 
@@ -51,6 +52,23 @@ struct EntityStorage {
     entity_list.push_back(e);
     present_list.push_back(true);
     return entity_list.size() - 1;
+  }
+
+  /** Delete an entity, also performs any additional memory freeing. NOP on
+   * double-free. */
+  inline EntityId erase(EntityId id) {
+    assert(entity_list.size() == present_list.size());
+    if (id >= entity_list.size() or not present_list[id]) {
+      printf("ERROR: Double free entity ID %d\n", id);
+    }
+    present_list[id] = false;
+    switch (entity_list[id].kind) {
+    case EK_ENEMY_BASIC:
+      delete entity_list[id].enemy_basic;
+      break;
+    default:
+      break;
+    }
   }
 
   /** Returns null if not present */

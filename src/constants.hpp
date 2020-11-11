@@ -18,3 +18,6 @@ constexpr float MIN_LASER_LENGTH = 400.0f;
  * of 1 will make the camera perfectly track the desired position. A value of 0
  * will stop the camera moving. */
 constexpr float CAMERA_SNAP_SPEED = 0.05;
+
+/** Basic enemy movement speed */
+constexpr float ENEMY_BASIC_WALK_SPEED = 50.0f;
