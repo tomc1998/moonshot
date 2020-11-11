@@ -3,7 +3,7 @@
 #include "tileset.hpp"
 #include <memory>
 
-std::shared_ptr<Tileset> tileset = nullptr;
+extern std::shared_ptr<Tileset> tileset;
 
 /** Load the simple tileset */
 inline std::shared_ptr<Tileset> load_simple_tileset() {

@@ -63,8 +63,6 @@ int main(void) {
 
   level_1.load(reinterpret_cast<GameScreen &>(screen_stack.last()).state);
 
-  screen_stack.pop();
-
   while (!WindowShouldClose()) {
     screen_stack.last().on_frame();
     if (IsKeyPressed(KEY_ESCAPE)) {
