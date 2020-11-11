@@ -8,6 +8,11 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="src/sparse_matrix.hpp"/>
+    <File Name="src/simple_tileset.cpp"/>
+    <File Name="src/level.hpp"/>
+    <File Name="src/editor_state.hpp"/>
+    <File Name="src/camera_util.hpp"/>
     <File Name="src/nearest_intersection_finder.cpp"/>
     <File Name="src/nearest_intersector_finder.hpp"/>
     <File Name="src/laser.cpp"/>
