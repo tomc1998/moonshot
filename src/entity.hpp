@@ -3,7 +3,7 @@
 #include <raylib.h>
 
 /** A tag to indicate what 'kind' of entity this is - found on every entity*/
-enum EntityKind { EK_PLAYER, EK_ENEMY, EK_MIRROR, EK_LASER, EK_ENEMY_BASIC };
+enum EntityKind { EK_PLAYER, EK_MIRROR, EK_ENEMY_BASIC };
 
 /** Data for EK_MIRROR entities */
 struct MirrorData {
@@ -56,10 +56,11 @@ struct Entity {
   inline Entity(EntityKind kind, float x, float y, EnemyBasicData *enemy_basic)
       : kind(kind), pos{x, y}, enemy_basic(enemy_basic){};
 
-  inline Vector2 size() {
+  inline Vector2 size() const {
     switch (kind) {
     case EK_PLAYER:
-    case EK_ENEMY:
+    case EK_ENEMY_BASIC:
+    case EK_MIRROR:
       return {16, 16};
     }
   }
