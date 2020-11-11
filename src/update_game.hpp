@@ -31,19 +31,6 @@ inline void update_player(GameState &state, EntityId playerId) {
   } else {
     player->vel.y = 0;
   }
-
-  // Spawning lasers
-  if (IsMouseButtonPressed(0)) {
-    // Mouse relative to player
-    auto mouse = Vector2Subtract(GetMousePosition(),
-                                 {(float)screen_w / 2, (float)screen_h / 2});
-    auto laser_vel = Vector2Scale(Vector2Normalize(mouse), LASER_SPEED);
-    auto laser_off = Vector2Scale(Vector2Normalize(mouse), LASER_LEN);
-    auto laser_pos = Vector2Add(Vector2Add(player->pos, {8, 8}), laser_off);
-    Entity laser(EK_LASER, laser_pos.x, laser_pos.y);
-    laser.vel = laser_vel;
-    state.es.alloc(laser);
-  }
 }
 
 /** Just snaps positions, call after processing velocities */

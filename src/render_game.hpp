@@ -12,10 +12,6 @@ inline void render_entities(const EntityStorage &es) {
   es.iter([](const Entity &e) {
     if (e.kind == EK_MIRROR) {
       DrawLineEx(get_mirror_left(e), get_mirror_right(e), 4, WHITE);
-    } else if (e.kind == EK_LASER) {
-      DrawLineEx(Vector2Subtract(
-                     e.pos, Vector2Scale(Vector2Normalize(e.vel), LASER_LEN)),
-                 e.pos, 2, RED);
     } else {
       DrawRectangleV(e.pos, {16, 16}, WHITE);
     }
