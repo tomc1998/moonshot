@@ -19,7 +19,7 @@ public:
 
   void calculate_laser_vertices(const GameState &state);
 
-  void update(const GameState &state, float dt);
+  void update(GameState &state, float dt);
 
 private:
   std::vector<Vector2> _vertices;

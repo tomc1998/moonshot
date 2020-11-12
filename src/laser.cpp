@@ -10,13 +10,12 @@ Laser::Laser()
     : max_length(MIN_LASER_LENGTH), position(Vector2{0, 0}), length(0),
       firing_angle(0) {}
 
-void Laser::update(const GameState &state, float dt) {
-
+void Laser::update(GameState &state, float dt) {
   if (IsMouseButtonDown(0)) {
     if (length == 0) {
       // Set the firing angle from towards the mouse
-      const auto mouse_position_relative_to_player =
-          Vector2Subtract(GetMousePosition(), {screen_w / 2, screen_h / 2});
+      const auto mouse_position_relative_to_player = Vector2Subtract(
+          GetMousePosition(), {(float)screen_w / 2, (float)screen_h / 2});
       const auto player_position =
           Vector2Add(state.es.lookup(state.player)->pos, Vector2{8, 8});
       const auto mouse_position =
@@ -29,6 +28,36 @@ void Laser::update(const GameState &state, float dt) {
       // advance the laser by increasing its length
       length = Clamp(length + LASER_SPEED * dt, 0, max_length);
     }
+
+    // Check collision with enemies
+    state.es.iter_id([&](EntityId id, const auto &e) {
+      switch (e.kind) {
+      case EK_ENEMY_BASIC:
+        for (int ii = -1; ii < (int)this->_vertices.size() - 1; ++ii) {
+          const auto p0 = (ii == -1) ? this->position : this->_vertices[ii];
+          const auto q0 = this->_vertices[ii + 1];
+          const auto size = e.size();
+          Vector2 e_lines[] = {{e.pos.x, e.pos.y},
+                               {e.pos.x + size.x, e.pos.y},
+                               {e.pos.x + size.x, e.pos.y + size.y},
+                               {e.pos.x, e.pos.y + size.y}};
+          constexpr int nlines = sizeof(e_lines) / sizeof(e_lines[0]);
+          bool intersects = false;
+          for (int jj = 0; jj < nlines; ++jj) {
+            const auto p1 = e_lines[jj];
+            const auto q1 = e_lines[(jj + 1) % nlines];
+            if (line_segments_intersect(p0, q0, p1, q1)) {
+              intersects = true;
+              break;
+            }
+          }
+          if (intersects) {
+            state.es.erase(id);
+          }
+        }
+        break;
+      }
+    });
   } else {
     length = 0;
   }
@@ -38,8 +67,8 @@ void Laser::calculate_laser_vertices(const GameState &state) {
 
   _vertices.clear();
 
-  // Trace the path of the laser forwards, turning at mirrors, or terminating at
-  // walls.
+  // Trace the path of the laser forwards, turning at mirrors, or terminating
+  // at walls.
   auto current_position = position;
   auto current_angle = firing_angle;
   auto remaining_length = length;
@@ -51,8 +80,8 @@ void Laser::calculate_laser_vertices(const GameState &state) {
         Vector2{current_position.x + remaining_length * cosf(current_angle),
                 current_position.y - remaining_length * sinf(current_angle)};
 
-    // Now find all entities that intersect with that line segment. We want the
-    // entity that is closest to the current position.
+    // Now find all entities that intersect with that line segment. We want
+    // the entity that is closest to the current position.
     NearestIntersectorFinder nearestIntersectionFinder(
         current_position, line_segment_end,
         std::numeric_limits<float>::infinity());
@@ -84,10 +113,10 @@ void Laser::calculate_laser_vertices(const GameState &state) {
       for (int yy = 0; yy < tm.h; ++yy) {
         const auto &tile = ts.tiles[tm.tiles[yy * tm.w + xx]];
         if (!tile.collides) {
-          // If a tile doesn't collide, we'll also say that it doesn't stop the
-          // laser. We might want to later add an "is_transparent" property to a
-          // Tile so we can have colliding glass tile that the laser still
-          // passes through.
+          // If a tile doesn't collide, we'll also say that it doesn't stop
+          // the laser. We might want to later add an "is_transparent"
+          // property to a Tile so we can have colliding glass tile that the
+          // laser still passes through.
           continue;
         }
 
@@ -168,8 +197,8 @@ void Laser::calculate_laser_vertices(const GameState &state) {
       _vertices.emplace_back(nearestIntersectionFinder.closest_intersection);
       remaining_length = 0;
     } else {
-      // There are no intersecting entities, so just continue the laser for the
-      // remaining length
+      // There are no intersecting entities, so just continue the laser for
+      // the remaining length
       _vertices.emplace_back(line_segment_end);
       remaining_length = 0;
     }

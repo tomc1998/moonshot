@@ -3,11 +3,41 @@
 #include "entity.hpp"
 #include "entity_storage.hpp"
 #include "game_state.hpp"
+#include <iostream>
 
 inline void update_entities(GameState &state, float dt) {
   state.es.iter([dt](Entity &e) {
     e.pos.x += e.vel.x * dt;
     e.pos.y += e.vel.y * dt;
+
+    switch (e.kind) {
+    case EK_ENEMY_BASIC:
+      auto &eb = *e.enemy_basic;
+      const auto &action = eb.actions[eb.curr_action];
+      eb.time_in_action += dt;
+      switch (action.kind) {
+      case EnemyBasicActionKind::MOVE: {
+        // Check if reached the position
+        Vector2 move_rel = Vector2Subtract(action.move, e.pos);
+        float dis = Vector2Length(move_rel);
+        if (dis < ENEMY_BASIC_WALK_SPEED * dt) {
+          eb.next_action();
+          e.vel = {0, 0};
+          break;
+        }
+        e.vel =
+            Vector2Scale(Vector2Normalize(move_rel), ENEMY_BASIC_WALK_SPEED);
+        break;
+      }
+      case EnemyBasicActionKind::WAIT:
+        e.vel = {0, 0};
+        if (eb.time_in_action > action.wait) {
+          eb.next_action();
+        }
+        break;
+      }
+      break;
+    }
   });
 }
 
