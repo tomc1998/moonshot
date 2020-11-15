@@ -32,6 +32,8 @@ struct Tilemap {
   }
 
   inline int tile_index(int xx, int yy) const { return yy * w + xx; }
+  inline int tile_x(int tile_index) const { return tile_index % w; }
+  inline int tile_y(int tile_index) const { return tile_index / w; }
   inline const Tile &get_tile(const Tileset &ts, int index) const {
     return ts.tiles[tiles[index]];
   }

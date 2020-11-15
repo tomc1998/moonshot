@@ -3,6 +3,7 @@
 #include "tilemap.hpp"
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/astar_search.hpp>
+#include <list>
 
 using boost::adjacency_list;
 using boost::edge_weight_t;
@@ -12,6 +13,7 @@ using boost::property;
 using boost::property_map;
 using boost::undirectedS;
 using boost::vecS;
+using std::list;
 using std::vector;
 
 // See https://www.boost.org/doc/libs/1_74_0/libs/graph/example/astar-cities.cpp
@@ -47,15 +49,17 @@ public:
   // Constructs a NavMesh based on a given Tilemap
   NavMesh(const Tilemap &tm, const Tileset &ts);
 
-  void find_path(vertex start, vertex goal, int width);
+  // Returns a vector of tile indexes that represent the path
+  list<int> find_shortest_path(vertex start, vertex goal);
 
 private:
-  // Populates _edges
-  void find_edges(const Tilemap &tm, const Tileset &ts);
-
-  void check_if_tiles_connected(const Tilemap &tm, const Tileset &ts,
-                                int from_tile_index, int to_tile_index,
-                                WeightMap &weightmap, cost weight);
+  void find_edges();
+  void check_if_tiles_connected(
+      int from_tile_index, int to_tile_index,
+      vector<int> other_tile_indexes_which_must_not_collide,
+      WeightMap &weightmap, cost weight);
 
   navmesh_t _navmesh;
+  const Tilemap &_tm;
+  const Tileset &_ts;
 };
