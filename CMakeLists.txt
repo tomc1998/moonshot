@@ -46,3 +46,35 @@ target_link_libraries(game raylib)
 if(NOT EXISTS "assets")
   execute_process(COMMAND "ln" "-s" "${CMAKE_CURRENT_SOURCE_DIR}/assets" "assets")
 endif()
+
+## Set warning levels
+#if(MSVC)
+#  target_compile_options(game PRIVATE /W4 /WX)
+#  # TODO disable dumb warnings, see gcc/clang equivalents in other if branch
+#else()
+#  target_compile_options(game PRIVATE -Wall -Wextra -Werror
+#    # Dumb warnings I don't care about:
+#    ## 'reorder' warns against initialising class fields in a different order
+#    ## to their declaration - i don't find this particularly useful & it makes
+#    ## refactoring a huge pain
+#    -Wno-reorder
+#    ## 'unused-parameter' warns when parameters aren't used - but it's useful
+#    ## to have unused parameters sometimes, e.g. when future-proofing in the
+#    ## short term
+#    -Wno-unused-parameter
+#    ## Declaring loop variables as `int` is useful, for cases where you write
+#    ## the expression `i-1` for whatever reason, and don't want to end up with
+#    ## an int overflow bug. 'sign-compare' forces you to cast the result of
+#    ## vector::size() every single time you use it as a loop boundary, which is a
+#    ## pain & not worth it imo
+#    -Wno-sign-compare
+#
+#    # Unfortunately raymath.h is a C11 header, so it uses the 0 struct
+#    # initializer - this shouldn't really cause any bugs, but it does pop up a
+#    # bunch of C++ warnings. For now, just disable the missing initializer
+#    # warning...
+#    # TODO use c++ raymath alternative?
+#    -Wno-missing-field-initializers
+#    )
+#endif()
+

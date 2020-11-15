@@ -56,6 +56,8 @@ void Laser::update(GameState &state, float dt) {
           }
         }
         break;
+      default:
+        break;
       }
     });
   } else {

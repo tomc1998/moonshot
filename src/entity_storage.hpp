@@ -73,7 +73,7 @@ struct EntityStorage {
    * It *IS* safe to call this whilst iterating through entities via
    * iter/iter_id, because this won't actually move entities, simply marks
    * slots as available for new entities when allocating. */
-  inline EntityId erase(EntityId id) {
+  inline void erase(EntityId id) {
     assert(entity_list.size() == present_list.size());
     if (id >= entity_list.size() or not present_list[id]) {
       printf("ERROR: Double free entity ID %ld\n", id);
