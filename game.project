@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="src/navmesh.cpp"/>
+    <File Name="src/navmesh.hpp"/>
     <File Name="src/sparse_matrix.hpp"/>
     <File Name="src/simple_tileset.cpp"/>
     <File Name="src/level.hpp"/>

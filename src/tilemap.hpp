@@ -18,7 +18,7 @@ struct Tilemap {
     assert(w * h == tiles.size());
     for (int xx = 0; xx < w; ++xx) {
       for (int yy = 0; yy < h; ++yy) {
-        const auto &tile = ts.tiles[tiles[yy * w + xx]];
+        const auto &tile = ts.tiles[tiles[tile_index(xx, yy)]];
         if (!tile.visible) {
           continue;
         }
@@ -29,5 +29,10 @@ struct Tilemap {
                        {x + xx * ts.tile_size, y + yy * ts.tile_size}, WHITE);
       }
     }
+  }
+
+  inline int tile_index(int xx, int yy) const { return yy * w + xx; }
+  inline const Tile &get_tile(const Tileset &ts, int index) const {
+    return ts.tiles[tiles[index]];
   }
 };

@@ -13,6 +13,7 @@
 #include "game_screen.hpp"
 #include "globals.hpp"
 #include "level.hpp"
+#include "navmesh.hpp"
 #include "screen.hpp"
 #include "screen_stack.hpp"
 #include "simple_tileset.hpp"
@@ -60,6 +61,8 @@ int main(void) {
       },
       {24, 24}};
 
+  NavMesh nm(level_1.tilemap, *level_1.tileset);
+
   // Disable raylib exiting when <esc> is pressed
   SetExitKey(0);
 
@@ -82,4 +85,3 @@ int main(void) {
   CloseWindow();
   return 0;
 }
-
