@@ -2,6 +2,7 @@
 
 #include "tilemap.hpp"
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/astar_search.hpp>
 
 using boost::adjacency_list;
 using boost::edge_weight_t;
@@ -28,31 +29,33 @@ class NavMesh {
   typedef navmesh_t::edge_descriptor edge_descriptor;
 
   // Each cell in the tilemap can be specified as an integer which is its
-  // position in the tiles vector. So an edge in the NavMesg is defined as two
+  // position in the tiles vector. So an edge in the NavMesh is defined as two
   // cells in the tilemap.
   typedef std::pair<int, int> edge;
+
+  // visitor clas that terminates when we find the goal
+  class astar_goal_visitor : public boost::default_astar_visitor {
+  public:
+    astar_goal_visitor(vertex goal);
+    void examine_vertex(vertex u, const navmesh_t &g);
+
+  private:
+    vertex m_goal;
+  };
 
 public:
   // Constructs a NavMesh based on a given Tilemap
   NavMesh(const Tilemap &tm, const Tileset &ts);
 
-  void find_path(vertex start, vertex goal);
+  void find_path(vertex start, vertex goal, int width);
 
 private:
   // Populates _edges
   void find_edges(const Tilemap &tm, const Tileset &ts);
 
   void check_if_tiles_connected(const Tilemap &tm, const Tileset &ts,
-                                int from_tile_index, int to_tile_index);
-
-  // The edges in our NavMesh define which cells in the tilemap can be travelled
-  // between in one step.
-  vector<edge> _edges;
-
-  // The weight of an edge defines the cost to use that edge. If some tiles were
-  // concrete and others were grass, we could make it less desireable to walk on
-  // grass.
-  vector<cost> _weights;
+                                int from_tile_index, int to_tile_index,
+                                WeightMap &weightmap, cost weight);
 
   navmesh_t _navmesh;
 };

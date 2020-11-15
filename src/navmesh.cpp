@@ -1,5 +1,4 @@
 #include "navmesh.hpp"
-#include <boost/graph/astar_search.hpp>
 #include <iostream>
 #include <list>
 
@@ -16,43 +15,42 @@ template <class Graph, class CostType>
 class distance_heuristic : public astar_heuristic<Graph, CostType> {
 public:
   typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
-  distance_heuristic(Vertex goal) {}
-  CostType operator()(Vertex u) { return 1; }
-};
+  distance_heuristic(Vertex goal, int w)
+      : _goal_x(goal % w), _goal_y(goal / w), _width(w) {}
+  CostType operator()(Vertex u) {
 
-struct found_goal {}; // exception for termination
+    int u_x = u % _width;
+    int u_y = u / _width;
 
-// visitor that terminates when we find the goal
-template <class Vertex>
-class astar_goal_visitor : public boost::default_astar_visitor {
-public:
-  astar_goal_visitor(Vertex goal) : m_goal(goal) {}
-  template <class Graph> void examine_vertex(Vertex u, Graph &g) {
-    if (u == m_goal)
-      throw found_goal();
+    CostType dx = _goal_x - u_x;
+    CostType dy = _goal_y - u_y;
+    return ::sqrt(dx * dx + dy * dy);
   }
 
 private:
-  Vertex m_goal;
+  int _width;
+  int _goal_x;
+  int _goal_y;
 };
+
+struct found_goal {}; // exception for path finding termination
+
+NavMesh::astar_goal_visitor::astar_goal_visitor(vertex goal) : m_goal(goal) {}
+void NavMesh::astar_goal_visitor::examine_vertex(vertex u, const navmesh_t &g) {
+  if (u == m_goal)
+    throw found_goal();
+}
 
 NavMesh::NavMesh(const Tilemap &tm, const Tileset &ts) : _navmesh(tm.w * tm.h) {
 
   find_edges(tm, ts);
-  // Populate the edges and weights in the _navmesh
-  WeightMap weightmap = get(edge_weight, _navmesh);
-  for (std::size_t j = 0; j < _edges.size(); ++j) {
-    edge_descriptor e;
-    bool inserted;
-    boost::tie(e, inserted) =
-        add_edge(_edges[j].first, _edges[j].second, _navmesh);
-    weightmap[e] = _weights[j];
-  }
 
-  find_path(17, 225);
+  find_path(17, 225, tm.w);
 }
 
 void NavMesh::find_edges(const Tilemap &tm, const Tileset &ts) {
+  WeightMap weightmap = get(edge_weight, _navmesh);
+  float sqrt_two = ::sqrtf(2.0f);
   for (int xx = 0; xx < tm.w; ++xx) {
     for (int yy = 0; yy < tm.h; ++yy) {
       auto tile_index = tm.tile_index(xx, yy);
@@ -66,53 +64,58 @@ void NavMesh::find_edges(const Tilemap &tm, const Tileset &ts) {
 
       // Check moving W
       if (xx > 0) {
-        check_if_tiles_connected(tm, ts, tile_index, tm.tile_index(xx - 1, yy));
+        check_if_tiles_connected(tm, ts, tile_index, tm.tile_index(xx - 1, yy),
+                                 weightmap, 1.0f);
       }
 
       // Check moving NW
-      //      if ((xx > 0) && (yy > 0)) {
-      //        check_if_tiles_connected(tm, ts, tile_index,
-      //                                 tm.tile_index(xx - 1, yy - 1));
-      //      }
+      if ((xx > 0) && (yy > 0)) {
+        check_if_tiles_connected(tm, ts, tile_index,
+                                 tm.tile_index(xx - 1, yy - 1), weightmap,
+                                 sqrt_two);
+      }
 
       // Check moving N
       if (yy > 0) {
-        check_if_tiles_connected(tm, ts, tile_index, tm.tile_index(xx, yy - 1));
+        check_if_tiles_connected(tm, ts, tile_index, tm.tile_index(xx, yy - 1),
+                                 weightmap, 1.0f);
       }
 
       // Check moving NE
-      //      if ((xx < (tm.w - 1)) && (yy > 0)) {
-      //        check_if_tiles_connected(tm, ts, tile_index,
-      //                                 tm.tile_index(xx + 1, yy - 1));
-      //      }
+      if ((xx < (tm.w - 1)) && (yy > 0)) {
+        check_if_tiles_connected(tm, ts, tile_index,
+                                 tm.tile_index(xx + 1, yy - 1), weightmap,
+                                 sqrt_two);
+      }
     }
   }
 }
 
 void NavMesh::check_if_tiles_connected(const Tilemap &tm, const Tileset &ts,
-                                       int from_tile_index, int to_tile_index) {
+                                       int from_tile_index, int to_tile_index,
+                                       WeightMap &weightmap, cost weight) {
   const auto &to_tile = tm.get_tile(ts, to_tile_index);
   if (!to_tile.collides) {
-    // We can move in between from_tile and _to_tile
-    _edges.emplace_back(edge{from_tile_index, to_tile_index});
-    // For now, all weights are the same. Maybe later add more/less favourable
-    // tile types for walking on.
-    _weights.emplace_back(1.0f);
+    edge_descriptor e;
+    bool inserted;
+    boost::tie(e, inserted) =
+        add_edge(from_tile_index, to_tile_index, _navmesh);
+    weightmap[e] = weight;
   }
 }
 
-void NavMesh::find_path(vertex start, vertex goal) {
+void NavMesh::find_path(vertex start, vertex goal, int width) {
   vector<navmesh_t::vertex_descriptor> p(num_vertices(_navmesh));
   vector<cost> d(num_vertices(_navmesh));
   try {
     // call astar named parameter interface
     astar_search_tree(
-        _navmesh, start, distance_heuristic<navmesh_t, cost>(goal),
+        _navmesh, start, distance_heuristic<navmesh_t, cost>(goal, width),
         predecessor_map(
             make_iterator_property_map(p.begin(), get(vertex_index, _navmesh)))
             .distance_map(make_iterator_property_map(
                 d.begin(), get(vertex_index, _navmesh)))
-            .visitor(astar_goal_visitor<vertex>(goal)));
+            .visitor(astar_goal_visitor(goal)));
   } catch (found_goal fg) { // found a path to the goal
     list<vertex> shortest_path;
     for (vertex v = goal;; v = p[v]) {
