@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <raylib.h>
 
 /** A tag to indicate what 'kind' of entity this is - found on every entity*/
@@ -63,5 +64,6 @@ struct Entity {
     case EK_MIRROR:
       return {16, 16};
     }
+    assert(false && "Switch fell through due to improper value of `kind`");
   }
 };

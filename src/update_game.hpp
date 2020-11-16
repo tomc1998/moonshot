@@ -11,7 +11,8 @@ inline void update_entities(GameState &state, float dt) {
     e.pos.y += e.vel.y * dt;
 
     switch (e.kind) {
-    case EK_ENEMY_BASIC:
+    // Enemy AI
+    case EK_ENEMY_BASIC: {
       auto &eb = *e.enemy_basic;
       const auto &action = eb.actions[eb.curr_action];
       eb.time_in_action += dt;
@@ -36,6 +37,9 @@ inline void update_entities(GameState &state, float dt) {
         }
         break;
       }
+      break;
+    }
+    default:
       break;
     }
   });
