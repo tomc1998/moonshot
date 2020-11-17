@@ -7,6 +7,10 @@
 
 using TileId = uint16_t;
 
+struct Tilecoords {
+  int tile_x, tile_y;
+};
+
 struct Tilemap {
   float x, y;
   int w, h;
@@ -32,8 +36,9 @@ struct Tilemap {
   }
 
   inline int tile_index(int xx, int yy) const { return yy * w + xx; }
-  inline int tile_x(int tile_index) const { return tile_index % w; }
-  inline int tile_y(int tile_index) const { return tile_index / w; }
+  inline Tilecoords tile_coords(int tile_index) const {
+    return Tilecoords{tile_index % w, tile_index / w};
+  }
   inline const Tile &get_tile(const Tileset &ts, int index) const {
     return ts.tiles[tiles[index]];
   }

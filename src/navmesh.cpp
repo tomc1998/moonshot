@@ -14,21 +14,18 @@ class distance_heuristic : public astar_heuristic<Graph, CostType> {
 public:
   typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
   distance_heuristic(Vertex goal, const Tilemap &tm)
-      : _tm(tm), _goal_x(tm.tile_x(goal)), _goal_y(tm.tile_y(goal)) {}
+      : _tm(tm), _goal_coords(tm.tile_coords(goal)) {}
   CostType operator()(Vertex u) {
+    Tilecoords u_coords = _tm.tile_coords(u);
 
-    int u_x = _tm.tile_x(u);
-    int u_y = _tm.tile_y(u);
-
-    CostType dx = _goal_x - u_x;
-    CostType dy = _goal_y - u_y;
+    CostType dx = _goal_coords.tile_x - u_coords.tile_x;
+    CostType dy = _goal_coords.tile_y - u_coords.tile_y;
     return ::sqrt(dx * dx + dy * dy);
   }
 
 private:
   const Tilemap &_tm;
-  int _goal_x;
-  int _goal_y;
+  Tilecoords _goal_coords;
 };
 
 struct found_goal {}; // exception for path finding termination
