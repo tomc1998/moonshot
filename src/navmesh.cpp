@@ -37,7 +37,7 @@ void NavMesh::astar_goal_visitor::examine_vertex(vertex u, const navmesh_t &g) {
 }
 
 NavMesh::NavMesh(const Tilemap &tm, const Tileset &ts)
-    : _navmesh(tm.w * tm.h), _tm(tm), _ts(ts) {
+    : _navmesh(tm.w * tm.h), tm(tm), ts(ts) {
 
   find_edges();
 
@@ -49,14 +49,14 @@ NavMesh::NavMesh(const Tilemap &tm, const Tileset &ts)
   cout << endl;
 }
 
-list<int> NavMesh::find_shortest_path(vertex start, vertex goal) {
+list<int> NavMesh::find_shortest_path(vertex start, vertex goal) const {
   list<int> shortest_path;
   vector<navmesh_t::vertex_descriptor> p(num_vertices(_navmesh));
   vector<cost> d(num_vertices(_navmesh));
   try {
     // call astar named parameter interface
     astar_search_tree(
-        _navmesh, start, distance_heuristic<navmesh_t, cost>(goal, _tm),
+        _navmesh, start, distance_heuristic<navmesh_t, cost>(goal, tm),
         predecessor_map(
             make_iterator_property_map(p.begin(), get(vertex_index, _navmesh)))
             .distance_map(make_iterator_property_map(
@@ -72,13 +72,17 @@ list<int> NavMesh::find_shortest_path(vertex start, vertex goal) {
   return shortest_path;
 }
 
+list<int> NavMesh::find_shortest_path(Tilecoords start, Tilecoords goal) const {
+  return find_shortest_path(tm.tile_index(start), tm.tile_index(goal));
+}
+
 void NavMesh::find_edges() {
   WeightMap weightmap = get(edge_weight, _navmesh);
   float sqrt_two = ::sqrtf(2.0f);
-  for (int xx = 0; xx < _tm.w; ++xx) {
-    for (int yy = 0; yy < _tm.h; ++yy) {
-      auto tile_index = _tm.tile_index(xx, yy);
-      const auto &tile = _tm.get_tile(_ts, tile_index);
+  for (int xx = 0; xx < tm.w; ++xx) {
+    for (int yy = 0; yy < tm.h; ++yy) {
+      auto tile_index = tm.tile_index(xx, yy);
+      const auto &tile = tm.get_tile(ts, tile_index);
       if (tile.collides) {
         continue;
       }
@@ -88,7 +92,7 @@ void NavMesh::find_edges() {
 
       // Check moving W
       if (xx > 0) {
-        check_if_tiles_connected(tile_index, _tm.tile_index(xx - 1, yy),
+        check_if_tiles_connected(tile_index, tm.tile_index(xx - 1, yy),
                                  vector<int>(), weightmap, 1.0f);
       }
 
@@ -96,23 +100,23 @@ void NavMesh::find_edges() {
       // of the diagonal movement do not collide
       if ((xx > 0) && (yy > 0)) {
         check_if_tiles_connected(
-            tile_index, _tm.tile_index(xx - 1, yy - 1),
-            vector<int>{_tm.tile_index(xx - 1, yy), _tm.tile_index(xx, yy - 1)},
+            tile_index, tm.tile_index(xx - 1, yy - 1),
+            vector<int>{tm.tile_index(xx - 1, yy), tm.tile_index(xx, yy - 1)},
             weightmap, sqrt_two);
       }
 
       // Check moving N
       if (yy > 0) {
-        check_if_tiles_connected(tile_index, _tm.tile_index(xx, yy - 1),
+        check_if_tiles_connected(tile_index, tm.tile_index(xx, yy - 1),
                                  vector<int>(), weightmap, 1.0f);
       }
 
       // Check moving NE. We also need to make sure the tiles on either side
       // of the diagonal movement do not collide
-      if ((xx < (_tm.w - 1)) && (yy > 0)) {
+      if ((xx < (tm.w - 1)) && (yy > 0)) {
         check_if_tiles_connected(
-            tile_index, _tm.tile_index(xx + 1, yy - 1),
-            vector<int>{_tm.tile_index(xx + 1, yy), _tm.tile_index(xx, yy - 1)},
+            tile_index, tm.tile_index(xx + 1, yy - 1),
+            vector<int>{tm.tile_index(xx + 1, yy), tm.tile_index(xx, yy - 1)},
             weightmap, sqrt_two);
       }
     }
@@ -126,13 +130,13 @@ void NavMesh::check_if_tiles_connected(
 
   bool all_tiles_do_not_collide = true;
 
-  if (_tm.get_tile(_ts, to_tile_index).collides) {
+  if (tm.get_tile(ts, to_tile_index).collides) {
     all_tiles_do_not_collide = false;
   }
 
   if (all_tiles_do_not_collide) {
     for (auto ti : other_tile_indexes_which_must_not_collide) {
-      const auto &tile = _tm.get_tile(_ts, ti);
+      const auto &tile = tm.get_tile(ts, ti);
       if (tile.collides) {
         all_tiles_do_not_collide = false;
       }

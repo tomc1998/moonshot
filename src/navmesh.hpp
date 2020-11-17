@@ -49,8 +49,14 @@ public:
   // Constructs a NavMesh based on a given Tilemap
   NavMesh(const Tilemap &tm, const Tileset &ts);
 
-  // Returns a vector of tile indexes that represent the path
-  list<int> find_shortest_path(vertex start, vertex goal);
+  // Returns a list of tile indexes that represent the path
+  list<int> find_shortest_path(vertex start, vertex goal) const;
+
+  // Returns a list of tile indexes that represent the path
+  list<int> find_shortest_path(Tilecoords start, Tilecoords goal) const;
+
+  const Tilemap &tm;
+  const Tileset &ts;
 
 private:
   void find_edges();
@@ -60,6 +66,4 @@ private:
       WeightMap &weightmap, cost weight);
 
   navmesh_t _navmesh;
-  const Tilemap &_tm;
-  const Tileset &_ts;
 };

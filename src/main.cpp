@@ -25,7 +25,7 @@ int main(void) {
   SetTargetFPS((int)FPS);
 
   const auto tileset = load_simple_tileset();
-  const Level level_1{
+  Level level_1{
       tileset,
       // clang-format off
     Tilemap{0, 0, 16, 16, {
@@ -61,7 +61,22 @@ int main(void) {
       },
       {24, 24}};
 
+  // Unfortunately since the construction of the entity data for an enemy along
+  // a path relies on knowing the NavMesh, which in turn is constructed from the
+  // Tilemap and Tileset, we need to add those after the level has already been
+  // created (and make the level non-const). It's probably possible with
+  // refactoring and addition of more constructors to get around this.
+  //
+  // Here we're adding an enemy that moves on paths from tiles (3,12) ->
+  // (11,6) -> (5,1)
   NavMesh nm(level_1.tilemap, *level_1.tileset);
+  level_1.entity_list.emplace_back(
+      EK_ENEMY_BASIC, Tilecoords{5, 1},
+      EnemyPathData{{EnemyPathAction({3, 12}), EnemyPathAction(3),
+                     EnemyPathAction({11, 6}), EnemyPathAction(1),
+                     EnemyPathAction({13, 8}), EnemyPathAction(3),
+                     EnemyPathAction({5, 1}), EnemyPathAction(2)}},
+      nm);
 
   // Disable raylib exiting when <esc> is pressed
   SetExitKey(0);
