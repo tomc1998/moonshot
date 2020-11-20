@@ -36,6 +36,20 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
 endif()
 ########################
 
+########################
+# Get boost 1.74.0
+include(FetchContent)
+FetchContent_Declare(
+    boost
+    URL https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz
+)
+FetchContent_GetProperties(boost)
+if (NOT boost_POPULATED)
+  FetchContent_Populate(Boost)
+endif()
+include_directories(${boost_SOURCE_DIR})
+########################
+
 # Find all source files, create executable
 file(GLOB_RECURSE SRC "src/*.cpp")
 add_executable(game ${SRC})
