@@ -11,6 +11,7 @@
 struct EditorState {
   SparseMatrix<TileId> tiles;
   std::shared_ptr<Tileset> tileset;
+  std::vector<Entity> entity_list;
   /** If true, the mouse is down & we're drawing tiles on the canvas. This
    * isn't set if the mouse is pressed on top of the picker, for example. */
   bool drawing = false;

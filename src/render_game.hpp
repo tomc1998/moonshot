@@ -8,15 +8,15 @@
 #include <raylib.h>
 #include <raymath.h>
 
-inline void render_entities(const EntityStorage &es) {
-  es.iter([](const Entity &e) {
-    if (e.kind == EK_MIRROR) {
-      DrawLineEx(get_mirror_left(e), get_mirror_right(e), 4, WHITE);
-    } else {
-      DrawRectangleV(e.pos, {16, 16}, WHITE);
-    }
-  });
+inline void render_entity(const Entity &e) {
+  if (e.kind == EK_MIRROR) {
+    DrawLineEx(get_mirror_left(e), get_mirror_right(e), 4, WHITE);
+  } else {
+    DrawRectangleV(e.pos, {16, 16}, WHITE);
+  }
 }
+
+inline void render_entities(const EntityStorage &es) { es.iter(render_entity); }
 
 inline void render_laser_base(Vector2 pos) {
   DrawCircle(pos.x, pos.y, 5, GREEN);

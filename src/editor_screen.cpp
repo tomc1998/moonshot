@@ -54,8 +54,18 @@ void EditorScreen::on_frame(ScreenStack &stack) {
   // Process mouse click / release
   if (IsMouseButtonPressed(0)) {
     if (!mouse_over_picker) {
-      state.drawing = true;
-      state.erasing = state.tiles.get(tile_hover_x, tile_hover_y) != nullptr;
+      // Don't draw entities, just insert them when mouse is clicked
+      if (state.picker_item.kind == PK_ENTITY) {
+        Entity e(state.picker_item.entity, tile_hover_x * ts.tile_size,
+                 tile_hover_y * ts.tile_size);
+        if (state.picker_item.entity == EK_ENEMY_BASIC) {
+          e.enemy_basic = new EnemyBasicData();
+        }
+        state.entity_list.push_back(e);
+      } else {
+        state.drawing = true;
+        state.erasing = state.tiles.get(tile_hover_x, tile_hover_y) != nullptr;
+      }
     }
   } else if (IsMouseButtonReleased(0)) {
     state.drawing = false;
@@ -83,7 +93,9 @@ void EditorScreen::on_frame(ScreenStack &stack) {
       break;
     }
     case PK_ENTITY:
-      assert(false && "Unimpl Entity");
+      // Entities only added on click
+      break;
+
     case PK_LASER:
       state.laser_pos = {
           (float)tile_hover_x * ts.tile_size + (float)ts.tile_size / 2.0f,
@@ -111,6 +123,11 @@ void EditorScreen::on_frame(ScreenStack &stack) {
 
   // Render laser base
   render_laser_base(state.laser_pos);
+
+  // Render entities
+  for (const Entity &e : state.entity_list) {
+    render_entity(e);
+  }
 
   // Draw a transparent rectangle over where the tile is hovered
   DrawRectangle(tile_hover_x * ts.tile_size, tile_hover_y * ts.tile_size,

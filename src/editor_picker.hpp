@@ -12,6 +12,7 @@ template <typename F> inline void picker_items_iter(EditorState &state, F f) {
     f(curr_ix, PickerItem(TileId(curr_ix)));
   }
   f(curr_ix++, PickerItem(PK_LASER));
+  all_entity_kinds([&](const auto kind) { f(curr_ix++, PickerItem(kind)); });
 }
 
 inline void update_picker(EditorState &state) {

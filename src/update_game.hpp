@@ -14,6 +14,10 @@ inline void update_entities(GameState &state, float dt) {
     // Enemy AI
     case EK_ENEMY_BASIC: {
       auto &eb = *e.enemy_basic;
+      // Special case: for an enemy with 0 actions, don't segfault!
+      if (eb.actions.size() == 0) {
+        break;
+      }
       const auto &action = eb.actions[eb.curr_action];
       eb.time_in_action += dt;
       switch (action.kind) {

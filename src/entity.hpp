@@ -8,6 +8,35 @@
 /** A tag to indicate what 'kind' of entity this is - found on every entity*/
 enum EntityKind { EK_PLAYER, EK_MIRROR, EK_ENEMY_BASIC };
 
+inline const char *ek_name(EntityKind kind) {
+  switch (kind) {
+  case EK_PLAYER:
+    return "Player";
+  case EK_MIRROR:
+    return "Mirror";
+  case EK_ENEMY_BASIC:
+    return "Enemy Basic";
+  }
+}
+
+/** Calls `f` with each entity kind in succession */
+template <typename F> inline void all_entity_kinds(F f) {
+  // Do this with a switch, so that we're warned when a new entitykind is added
+  for (const auto k : {EK_PLAYER, EK_MIRROR, EK_ENEMY_BASIC}) {
+    switch (k) {
+    case EK_PLAYER:
+      f(k);
+      break;
+    case EK_MIRROR:
+      f(k);
+      break;
+    case EK_ENEMY_BASIC:
+      f(k);
+      break;
+    }
+  }
+}
+
 /** Data for EK_MIRROR entities */
 struct MirrorData {
   /** Rotation of mirror, in radians */

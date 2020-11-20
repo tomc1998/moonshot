@@ -25,11 +25,9 @@ Level EditorState::serialise() {
   }
 
   Level ret{tileset,
-            {left * tileset->tile_size, top * tileset->tile_size, w, h,
-             tilemap_tiles},
-            {
-                Entity(EK_PLAYER, 16, 16),
-            },
+            {(float)left * tileset->tile_size, (float)top * tileset->tile_size,
+             w, h, tilemap_tiles},
+            entity_list,
             laser_pos};
   return ret;
 }
