@@ -77,10 +77,19 @@ struct EditorScreen : public Screen {
     } else if (IsMouseButtonReleased(0)) {
       state.drawing_tiles = false;
     }
+    // Pipette a tile
+    if (IsMouseButtonPressed(1)) {
+      if (!mouse_over_picker) {
+        const auto tile = state.tiles.get(tile_hover_x, tile_hover_y);
+        if (tile) {
+          state.curr_tile = *tile;
+        }
+      }
+    }
 
     // Draw / erase tiles
     if (state.drawing_tiles) {
-      if (state.erasing) {
+      if (state.erasing || state.curr_tile == 0) {
         state.tiles.remove(tile_hover_x, tile_hover_y);
       } else {
         state.tiles.set(tile_hover_x, tile_hover_y, state.curr_tile);
