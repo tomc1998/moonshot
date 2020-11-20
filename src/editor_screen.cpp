@@ -6,9 +6,11 @@
 #include <raymath.h>
 
 #include "camera_util.hpp"
+#include "editor_picker.hpp"
 #include "editor_state.hpp"
 #include "game_screen.hpp"
 #include "globals.hpp"
+#include "picker_item.hpp"
 #include "screen.hpp"
 #include "screen_stack.hpp"
 #include "simple_tileset.hpp"
@@ -18,25 +20,6 @@ EditorScreen::EditorScreen() {
   camera.rotation = 0;
   camera.target = {16, 16};
   camera.zoom = 2;
-}
-
-/** Check the mouse position, change the state's current position if the mouse
- * is currently over a tile in the picker. */
-inline void pick_tile(EditorState &state, Vector2 mouse) {
-  const auto &ts = *state.tileset;
-  for (int ii = 0; ii < ts.tiles.size(); ++ii) {
-    const float picker_tile_size = (float)ts.tile_size * PICKER_SCALE;
-    // Find the rendered tile position in the picker, this is the same
-    // calculation as used when rendering the picker
-    const Rectangle rect{
-        PICKER_SPACING + ii * (picker_tile_size + PICKER_SPACING),
-        screen_h - picker_tile_size - 32, picker_tile_size, picker_tile_size};
-    // Check if the mouse pos is inside this dst rect
-    if (CheckCollisionPointRec(mouse, rect)) {
-      state.curr_tile = ii;
-      return;
-    }
-  }
 }
 
 void EditorScreen::on_mount() { state.tileset = load_simple_tileset(); }
@@ -65,33 +48,43 @@ void EditorScreen::on_frame(ScreenStack &stack) {
     return;
   }
 
+  update_picker(state);
+
   // Process mouse click / release
   if (IsMouseButtonPressed(0)) {
-    if (mouse_over_picker) {
-      pick_tile(state, {mx, my});
-    } else {
-      state.drawing_tiles = true;
+    if (!mouse_over_picker) {
+      state.drawing = true;
       state.erasing = state.tiles.get(tile_hover_x, tile_hover_y) != nullptr;
     }
   } else if (IsMouseButtonReleased(0)) {
-    state.drawing_tiles = false;
+    state.drawing = false;
   }
   // Pipette a tile
   if (IsMouseButtonPressed(1)) {
     if (!mouse_over_picker) {
       const auto tile = state.tiles.get(tile_hover_x, tile_hover_y);
       if (tile) {
-        state.curr_tile = *tile;
+        state.picker_item = PickerItem(*tile);
       }
     }
   }
 
   // Draw / erase tiles
-  if (state.drawing_tiles) {
-    if (state.erasing || state.curr_tile == 0) {
-      state.tiles.remove(tile_hover_x, tile_hover_y);
-    } else {
-      state.tiles.set(tile_hover_x, tile_hover_y, state.curr_tile);
+  if (state.drawing) {
+    switch (state.picker_item.kind) {
+    case PK_TILE: {
+      if (state.erasing || state.picker_item.tile == 0) {
+        state.tiles.remove(tile_hover_x, tile_hover_y);
+      } else {
+        state.tiles.set(tile_hover_x, tile_hover_y,
+                        std::move(state.picker_item.tile));
+      }
+      break;
+    }
+    case PK_ENTITY:
+      assert(false && "Unimpl LaiEntity");
+    case PK_LASER:
+      assert(false && "Unimpl Laser");
     }
   }
 
@@ -119,24 +112,7 @@ void EditorScreen::on_frame(ScreenStack &stack) {
 
   EndMode2D();
 
-  // Render picker
-  DrawRectangle(0, screen_h - PICKER_HEIGHT, screen_w, PICKER_HEIGHT, BLACK);
-  DrawLine(0, screen_h - PICKER_HEIGHT, screen_w, screen_h - PICKER_HEIGHT,
-           UI_EDGE_COL);
-  DrawText("Picker", 16, screen_h - PICKER_HEIGHT + 16, 20, UI_EDGE_COL);
-  for (int ii = 0; ii < ts.tiles.size(); ++ii) {
-    const auto &tile = ts.tiles[ii];
-    const float picker_tile_size = (float)ts.tile_size * PICKER_SCALE;
-    const Rectangle tile_rect{(float)tile.x * ts.tile_size,
-                              (float)tile.y * ts.tile_size, (float)ts.tile_size,
-                              (float)ts.tile_size};
-    const Rectangle dst_rect{
-        PICKER_SPACING + ii * (picker_tile_size + PICKER_SPACING),
-        screen_h - picker_tile_size - 32, picker_tile_size, picker_tile_size};
-    DrawTexturePro(ts.tex, tile_rect, dst_rect, {0, 0}, 0, WHITE);
-    const int line_thickness = (state.curr_tile == ii) ? 4 : 1;
-    DrawRectangleLinesEx(dst_rect, line_thickness, UI_EDGE_COL);
-  }
+  render_picker(state);
 
   DrawFPS(10, screen_h - 26);
   EndDrawing();
