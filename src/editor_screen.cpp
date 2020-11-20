@@ -11,6 +11,7 @@
 #include "game_screen.hpp"
 #include "globals.hpp"
 #include "picker_item.hpp"
+#include "render_game.hpp"
 #include "screen.hpp"
 #include "screen_stack.hpp"
 #include "simple_tileset.hpp"
@@ -82,9 +83,11 @@ void EditorScreen::on_frame(ScreenStack &stack) {
       break;
     }
     case PK_ENTITY:
-      assert(false && "Unimpl LaiEntity");
+      assert(false && "Unimpl Entity");
     case PK_LASER:
-      assert(false && "Unimpl Laser");
+      state.laser_pos = {
+          (float)tile_hover_x * ts.tile_size + (float)ts.tile_size / 2.0f,
+          (float)tile_hover_y * ts.tile_size + (float)ts.tile_size / 2.0f};
     }
   }
 
@@ -105,6 +108,9 @@ void EditorScreen::on_frame(ScreenStack &stack) {
                    {(float)t.x * ts.tile_size, (float)t.y * ts.tile_size},
                    WHITE);
   }
+
+  // Render laser base
+  render_laser_base(state.laser_pos);
 
   // Draw a transparent rectangle over where the tile is hovered
   DrawRectangle(tile_hover_x * ts.tile_size, tile_hover_y * ts.tile_size,

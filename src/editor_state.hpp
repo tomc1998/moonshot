@@ -23,4 +23,5 @@ struct EditorState {
 
   /** Serialise this editor state into a level, and return it */
   Level serialise();
+  Vector2 laser_pos{8, 8};
 };

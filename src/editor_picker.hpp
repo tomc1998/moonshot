@@ -7,9 +7,11 @@
 
 /** Call f with each picker item & the index, e.g. f(ii, picker_item) */
 template <typename F> inline void picker_items_iter(EditorState &state, F f) {
-  for (int ii = 0; ii < state.tileset->tiles.size(); ++ii) {
-    f(ii, PickerItem(TileId(ii)));
+  int curr_ix = 0;
+  for (; curr_ix < state.tileset->tiles.size(); ++curr_ix) {
+    f(curr_ix, PickerItem(TileId(curr_ix)));
   }
+  f(curr_ix++, PickerItem(PK_LASER));
 }
 
 inline void update_picker(EditorState &state) {

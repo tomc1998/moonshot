@@ -18,9 +18,12 @@ inline void render_entities(const EntityStorage &es) {
   });
 }
 
-inline void render_laser(const Laser &laser) {
+inline void render_laser_base(Vector2 pos) {
+  DrawCircle(pos.x, pos.y, 5, GREEN);
+}
 
-  DrawCircle(laser.position.x, laser.position.y, 5, GREEN);
+inline void render_laser(const Laser &laser) {
+  render_laser_base(laser.position);
   const Vector2 *current_vertex = &laser.position;
   for (const Vector2 &vertex : laser.vertices()) {
     DrawLineEx(*current_vertex, vertex, 2, GREEN);

@@ -13,8 +13,8 @@ Level EditorState::serialise() {
     min_y = std::min(v.y, min_y);
     max_y = std::max(v.y, max_y);
   }
-  int top = min_y;
   int left = min_x;
+  int top = min_y;
   int w = std::max(0, 1 + max_x - min_x);
   int h = std::max(0, 1 + max_y - min_y);
 
@@ -25,10 +25,11 @@ Level EditorState::serialise() {
   }
 
   Level ret{tileset,
-            {0, 0, w, h, tilemap_tiles},
+            {left * tileset->tile_size, top * tileset->tile_size, w, h,
+             tilemap_tiles},
             {
                 Entity(EK_PLAYER, 16, 16),
             },
-            {24, 24}};
+            laser_pos};
   return ret;
 }
