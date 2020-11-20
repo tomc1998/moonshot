@@ -18,7 +18,7 @@
 struct GameScreen : public Screen {
   GameState state;
   GameScreen() {}
-  void on_frame() {
+  void on_frame(ScreenStack &stack) {
     game_update(state);
 
     // Draw

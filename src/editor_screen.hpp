@@ -23,5 +23,8 @@ struct EditorScreen : public Screen {
   EditorScreen();
 
   void on_mount() override;
-  void on_frame() override;
+  void on_frame(ScreenStack &stack) override;
+
+  /** Serialise & test the level */
+  void test(ScreenStack &stack);
 };

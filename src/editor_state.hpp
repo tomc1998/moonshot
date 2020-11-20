@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "level.hpp"
 #include "sparse_matrix.hpp"
 #include "tilemap.hpp"
 #include "tileset.hpp"
@@ -18,4 +19,7 @@ struct EditorState {
   bool erasing = false;
   /** The current selected tile - an index into tileset->tiles. */
   int curr_tile = 1;
+
+  /** Serialise this editor state into a level, and return it */
+  Level serialise();
 };

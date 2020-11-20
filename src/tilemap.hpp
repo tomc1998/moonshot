@@ -14,7 +14,7 @@ struct Tilecoords {
 struct Tilemap {
   float x, y;
   int w, h;
-  /** size == w * h */
+  /** size == w * h. Row major. */
   std::vector<TileId> tiles;
 
   /** Draw the tilemap with the given tileset at the given offset */

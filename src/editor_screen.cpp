@@ -7,8 +7,10 @@
 
 #include "camera_util.hpp"
 #include "editor_state.hpp"
+#include "game_screen.hpp"
 #include "globals.hpp"
 #include "screen.hpp"
+#include "screen_stack.hpp"
 #include "simple_tileset.hpp"
 
 EditorScreen::EditorScreen() {
@@ -39,7 +41,13 @@ inline void pick_tile(EditorState &state, Vector2 mouse) {
 
 void EditorScreen::on_mount() { state.tileset = load_simple_tileset(); }
 
-void EditorScreen::on_frame() {
+void EditorScreen::test(ScreenStack &stack) {
+  Level level = state.serialise();
+  stack.push(std::make_unique<GameScreen>());
+  level.load(reinterpret_cast<GameScreen &>(stack.last()).state);
+}
+
+void EditorScreen::on_frame(ScreenStack &stack) {
   const auto &ts = *state.tileset;
 
   // Get mouse screen / world position
@@ -50,6 +58,12 @@ void EditorScreen::on_frame() {
 
   // Is the mouse over the picker?
   bool mouse_over_picker = my > screen_h - PICKER_HEIGHT;
+
+  // Load level?
+  if (IsKeyPressed(KEY_F5)) {
+    test(stack);
+    return;
+  }
 
   // Process mouse click / release
   if (IsMouseButtonPressed(0)) {

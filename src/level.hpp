@@ -16,7 +16,7 @@ struct Level {
   std::shared_ptr<Tileset> tileset;
   Tilemap tilemap;
   std::vector<Entity> entity_list;
-  Vector2 laser_position;
+  Vector2 laser_position = {0.0, 0.0};
   /** Initial camera position */
   Vector2 camera = {0.0, 0.0};
   float camera_zoom = 1.0;
