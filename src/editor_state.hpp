@@ -9,7 +9,13 @@
 struct EditorState {
   SparseMatrix<TileId> tiles;
   std::shared_ptr<Tileset> tileset;
-  /** Boolean which is set when the mouse is pressed on the tilemap: if true,
-   * delete tiles under the mouse; otherwise, add tiles under the mouse. */
-  bool erasing;
+  /** If true, the mouse is down & we're drawing tiles on the canvas. This
+   * isn't set if the mouse is pressed on top of the picker, for example. */
+  bool drawing_tiles = false;
+  /** Boolean which is set when drawing tiles: if true,
+   * delete tiles under the mouse; otherwise, add tiles under the mouse.
+   * Undefined if drawing_tiles == false. */
+  bool erasing = false;
+  /** The current selected tile - an index into tileset->tiles. */
+  int curr_tile = 1;
 };
