@@ -53,7 +53,7 @@ int main(void) {
           Entity(EK_MIRROR, 64, 16, MirrorData{-PI / 4}),
           Entity(EK_MIRROR, 128, 16, MirrorData{PI / 3}),
           Entity(EK_ENEMY_BASIC, 32, 32,
-                 new EnemyBasicData{
+                 EnemyBasicData{
                      {EnemyBasicAction({48, 32}), EnemyBasicAction(1),
                       EnemyBasicAction({48, 48}), EnemyBasicAction(1),
                       EnemyBasicAction({32, 48}), EnemyBasicAction(1),

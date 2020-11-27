@@ -59,7 +59,7 @@ void EditorScreen::on_frame(ScreenStack &stack) {
         Entity e(state.picker_item.entity, tile_hover_x * ts.tile_size,
                  tile_hover_y * ts.tile_size);
         if (state.picker_item.entity == EK_ENEMY_BASIC) {
-          e.enemy_basic = new EnemyBasicData();
+          e.data = EnemyBasicData();
         }
         state.entity_list.push_back(e);
       } else {

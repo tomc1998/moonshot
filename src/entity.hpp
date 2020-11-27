@@ -4,6 +4,7 @@
 #include "tilemap.hpp"
 #include <cassert>
 #include <raylib.h>
+#include <variant>
 
 /** A tag to indicate what 'kind' of entity this is - found on every entity*/
 enum EntityKind { EK_PLAYER, EK_MIRROR, EK_ENEMY_BASIC };
@@ -90,29 +91,27 @@ struct EnemyPathData {
   std::vector<EnemyPathAction> actions;
 };
 
+struct NoEnemyData {};
+
+using EntityData = std::variant<NoEnemyData, MirrorData, EnemyBasicData>;
+
 struct Entity {
   Vector2 pos, vel = {0, 0};
   EntityKind kind;
-  // Bonus data, dependent on the value of `kind`.
-  union {
-    MirrorData mirror;
-    /** Enemy AI data, freed by entity_storage (since we can't have RAII types
-     * in a union) */
-    EnemyBasicData *enemy_basic;
-  };
+  EntityData data;
 
   inline Entity(EntityKind kind, float x, float y) : kind(kind), pos{x, y} {};
   inline Entity(EntityKind kind, float x, float y, MirrorData mirror)
-      : kind(kind), pos{x, y}, mirror(mirror){};
-  inline Entity(EntityKind kind, float x, float y, EnemyBasicData *enemy_basic)
-      : kind(kind), pos{x, y}, enemy_basic(enemy_basic){};
+      : kind(kind), pos{x, y}, data(mirror){};
+  inline Entity(EntityKind kind, float x, float y, EnemyBasicData enemy_basic)
+      : kind(kind), pos{x, y}, data(enemy_basic){};
 
   inline Entity(EntityKind kind, Tilecoords start_tile,
                 EnemyPathData enemy_path, const NavMesh &navmesh)
       : kind(kind), pos{(float)(navmesh.ts.tile_size * start_tile.tile_x),
                         (float)(navmesh.ts.tile_size * start_tile.tile_y)} {
     // We need to convert the enemy path data into enemy basic data
-    enemy_basic = new EnemyBasicData();
+    EnemyBasicData enemy_basic;
     Tilecoords prev_tile = start_tile;
     for (const EnemyPathAction &action : enemy_path.actions) {
       switch (action.kind) {
@@ -121,7 +120,7 @@ struct Entity {
         auto shortest_path = navmesh.find_shortest_path(prev_tile, action.move);
         for (auto tile_index : shortest_path) {
           auto tile_coords = navmesh.tm.tile_coords(tile_index);
-          enemy_basic->actions.emplace_back(
+          enemy_basic.actions.emplace_back(
               Vector2{(float)(navmesh.ts.tile_size * tile_coords.tile_x),
                       (float)(navmesh.ts.tile_size * tile_coords.tile_y)});
         }
@@ -129,10 +128,11 @@ struct Entity {
       } break;
       case EnemyBasicActionKind::WAIT:
         // Add an EnemyBasicAction WAIT for the wait
-        enemy_basic->actions.emplace_back(action.wait);
+        enemy_basic.actions.emplace_back(action.wait);
         break;
       }
     }
+    this->data = enemy_basic;
   };
 
   inline Vector2 size() const {

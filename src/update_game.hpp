@@ -4,6 +4,7 @@
 #include "entity_storage.hpp"
 #include "game_state.hpp"
 #include <iostream>
+#include <variant>
 
 inline void update_entities(GameState &state, float dt) {
   state.es.iter([dt](Entity &e) {
@@ -13,7 +14,7 @@ inline void update_entities(GameState &state, float dt) {
     switch (e.kind) {
     // Enemy AI
     case EK_ENEMY_BASIC: {
-      auto &eb = *e.enemy_basic;
+      auto &eb = std::get<EnemyBasicData>(e.data);
       // Special case: for an enemy with 0 actions, don't segfault!
       if (eb.actions.size() == 0) {
         break;

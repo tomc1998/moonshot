@@ -79,13 +79,6 @@ struct EntityStorage {
       printf("ERROR: Double free entity ID %ld\n", id);
     }
     present_list[id] = false;
-    switch (entity_list[id].kind) {
-    case EK_ENEMY_BASIC:
-      delete entity_list[id].enemy_basic;
-      break;
-    default:
-      break;
-    }
   }
 
   /** Returns null if not present */
